@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+    rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" 
+    crossorigin="anonymous">
+</head>
+<body>
+    <h2 class="text-info">給与自動計算</h2>
+    <br>
+    <table class="table">
+        <tr>
+          <th>ID</th>
+          <th>名前</th>
+          <th>勤務時間</th>
+          <th>給与</th>
+        </tr>
+        <% data.forEach((row) => { %>
+          <tr>
+            
+            <td><%= row.id %></td>
+            <td><%= row.name %></td>
+            <td><%= row.workTime %></td>
+            <td><%= row.salary %>円</td>
+          </tr>
+        <% }); %>
+      </table>
+      
+      </table>
+      
+        <form action="/calculate" method="post">
+          <br>
+            <label for="hourly_rate"></label>
+            <input type="number" id="hourly_rate" name="hourly_rate" placeholder="時給を設定" value="" required>
+        
+          <input type="date" id="dateFrom" name="dateFrom" required="">
+          <span>~</span>
+          <input type="date" id="dateTo" name="dateTo" required="">
+        
+          <input type="submit" value="自動計算">
+        </form>
+    <br>
+
+    <!-- 時給フォームのデータ保持 -->
+    <script>
+      // ページがロードされたときにローカルストレージから値を取得してフォームに設定
+      document.addEventListener('DOMContentLoaded', function() {
+        const hourlyRateInput = document.getElementById('hourly_rate');
+        const savedHourlyRate = localStorage.getItem('hourlyRate');
+
+        if (savedHourlyRate) {
+          hourlyRateInput.value = savedHourlyRate;
+        }
+      });
+      // フォームが送信されたときにローカルストレージに時給を保存
+      document.querySelector('form').addEventListener('submit', function() {
+
+        const hourlyRateInput = document.getElementById('hourly_rate');
+        const hourlyRate = hourlyRateInput.value;
+
+        localStorage.setItem('hourlyRate', hourlyRate);
+      });
+    </script>
+
+    <!-- 抽出期間フォームのデータ保持 -->
+    <script>
+      // ページがロードされたときにローカルストレージから値を取得してフォームに設定
+      document.addEventListener('DOMContentLoaded', function() {
+        const dateFromInput = document.getElementById('dateFrom');
+        const savedDateFrom = localStorage.getItem('dateFrom');
+
+        if (savedDateFrom) {
+          dateFromInput.value = savedDateFrom;
+        }
+      });
+
+      // フォームが送信されたときにローカルストレージに時給を保存
+      document.querySelector('form').addEventListener('submit', function() {
+
+        const dateFromInput = document.getElementById('dateFrom');
+        const dateFrom = dateFromInput.value;
+
+        localStorage.setItem('dateFrom', dateFrom);
+      });
+    </script>
+
+    <script>
+      // ページがロードされたときにローカルストレージから値を取得してフォームに設定
+      document.addEventListener('DOMContentLoaded', function() {
+        const dateToInput = document.getElementById('dateTo');
+        const savedDateTo = localStorage.getItem('dateTo');
+
+        if (savedDateTo) {
+          dateToInput.value = savedDateTo;
+        }
+      });
+
+      // フォームが送信されたときにローカルストレージに時給を保存
+      document.querySelector('form').addEventListener('submit', function() {
+
+        const dateToInput = document.getElementById('dateTo');
+        const dateTo = dateToInput.value;
+
+        localStorage.setItem('dateTo', dateTo);
+      });
+    </script>
+<br>
+<br>
+<br>
+    <h2 class="text-info">人件費(月)</h2>
+    <br>
+    <table class="table">
+        <tr>
+            <th>年</th>
+            <th>月</th>
+            <th>人件費</th>
+        </tr>
+        <% monthlyData.forEach(function(data) { %>
+            <tr>
+                <td><%= data.year %></td>
+                <td><%= data.month %></td>
+                <td><%= data.monthlyLabor %> 円</td>
+            </tr>
+        <% }); %>
+    </table>
+    <br>
+    <br>
+    <br>
+    <h2 class="text-info">人件費(年)</h2>
+    <br>
+    <table class="table">
+      <tr>
+        <th>年</th>
+            <th>人件費</th>
+          </tr>
+        <% yearlyData.forEach(function(data) { %>
+          <tr>
+            <td><%= data.year %></td>
+                <td><%= data.yearlyLabor %> 円</td>
+              </tr>
+              <% }); %>
+            </table>
+            <br>
+            <br>
+            <br>
+
+            <h1 class="text-info">FLコスト分析</h2>
+            <form action="/postElementFL" method="post" id="element">
+              <p>今月の食材費</p>
+              <input type="number" name="foodCost" placeholder="今月の食材費を入力" id="foodCost">
+              <p>今月の売り上げ高</p>
+              <input type="number" name="proceeds" placeholder="今月の売上高を入力" id="proceeds">
+              <br>
+              <input type="submit" value="登録">
+
+              <script>
+                // ページが読み込まれたとき、ローカルストレージから値を取得
+                  document.addEventListener('DOMContentLoaded', function() {
+                    const foodCostInput = document.getElementById('foodCost');
+                    const proceedsInput = document.getElementById('proceeds');
+                    
+                    const storedFoodCost = localStorage.getItem('foodCost');
+                    const storedProceeds = localStorage.getItem('proceeds');
+                    
+                    if (storedFoodCost) {
+                      foodCostInput.value = storedFoodCost;
+                    }
+                    
+                    if (storedProceeds) {
+                      proceedsInput.value = storedProceeds;
+                    }
+                  });
+
+                  // フォームが送信されたとき、入力値をローカルストレージに保存します
+                  document.getElementById('element').addEventListener('submit', function(event) {
+                    event.preventDefault();
+
+                    const foodCostInput = document.getElementById('foodCost');
+                    const proceedsInput = document.getElementById('proceeds');
+                    
+                    const foodCost = foodCostInput.value;
+                    const proceeds = proceedsInput.value;
+
+                    localStorage.setItem('foodCost', foodCost);
+                    localStorage.setItem('proceeds', proceeds);
+                    
+                    // 成功メッセージを表示します（必要に応じて実装できます）
+                    let messageElement = document.getElementById('message');
+                    messageElement.innerText = "登録しました";
+                    messageElement.style.display = 'block';
+
+                    // フォームの送信を遅延させます
+                    setTimeout(function () {
+                      document.getElementById('element').submit();
+                    }, 1000);
+                  });
+            </script>
+              <br>
+              <div id="message" class="text-center h1 mt-4" style="display: none;"></div>
+              <span class="arrow-down">&#8595;</span>
+              <br>
+
+              <!-- FLコスト分析ページへ飛ぶボタン -->
+              <a href="/analystics" class="FLbutton">FLコスト分析</a>
+            </form>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <h3>FLコスト分析とは</h3>
+            <br>
+            <br>
+            <p>FLコストとは、F=Food（食材費）と L=Labor（人件費）を足した費用のことです</p>
+            <p>この分析では、「FL比率」（売上高に占めるFLコストの比率）を計算し、今後の事業計画に対する提案を行います</p>
+            <p><span>FL比率は、お店が儲かっているかを判断する指標の一つ</span>であり、<span>50%程度が一般的な目安</span>となるため、50%以上であれば利益率が低いということになります</p>
+            <p>このFL比率を数値として可視化することで、経営方針を適格に定めることができます</p>
+            <p>この分析では、毎月のFL比率を50%以下に留めることを目標としていますが、自身で来月のFL比率の目標値を設定することもできます</p>
+            <p>今月の食材費と売上高を入力し、今月のFL比率が50%以下かどうかを確認し、今後の利益率の増加に繋げましょう</p>
+  
+    <a href="/" class="button">ホーム画面に戻る</a>
+  </body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+/* ページ全体の背景とフォントスタイル */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    padding: 20px;
+    font-weight: bold;
+}
+
+/* タイトルのスタイル */
+h2 {
+    text-align: center;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+h1 {
+    text-align: center;
+    margin-top: 100px;
+    margin: bottom 0px;
+    font-weight: bold;
+}
+
+h3{
+  text-align: center;
+  font-weight: bold;
+  color: #25b0e2;
+  border: solid 3px;
+  width: 30%;
+  position: relative;
+  left: 450px;
+  padding: 10px;
+}
+
+p{
+  text-align: center;
+  color: #30353a;
+  font-size: 18px;
+
+}
+
+
+.table {
+    width: 80%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px 0px #888888;
+}
+
+.table th, .table td {
+    padding: 8px;
+    text-align: center;
+}
+
+
+form {
+    display: flex;
+    width: 80%;
+    height: 10%;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px auto;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px 0px #888888;
+    border-radius: 5px;
+}
+
+form input[type="number"], form input[type="date"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+form input[type="submit"] {
+    width: 50%;
+    padding: 10px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* ボタンのスタイル */
+.button {
+    display: block;
+    width: 200px;
+    margin: 100px auto;
+    text-align: center;
+    padding: 10px;
+    background-color: #585f66;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.FLbutton {
+  display: block;
+    width: 500px;
+    height: 80px;
+    text-align: center;
+    font-size: 50px;
+    font-weight: bold;
+    padding: 5px;
+    background-color: #64d7db;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+/* テーブルヘッダのスタイル */
+.table th {
+    background-color: #007BFF;
+    color: #fff;
+}
+
+/* テーブルのセルのスタイル */
+.table td, .table th {
+    border: 1px solid #ddd;
+}
+
+/* テーブルデータ行の奇数行の背景色 */
+.table tr:nth-child(odd) {
+    background-color: #f2f2f2;
+}
+
+
+  .arrow-down {
+    font-size: 36px; /* 矢印の大きさを設定 */
+  }
+
+span{
+  color: #007BFF;
+}
+
+</style>
+</html>

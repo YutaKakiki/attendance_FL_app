@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <title>Edit</title>
+</head>
+<body>
+    <h3 class="text-center m-3">従業員名を編集</h3>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-8">
+                <form action="/update/<%=employee.id%>" method="post" class="d-flex">
+                    <div class="mb-3 me-2 flex-grow-1">
+                        <label for="employeeName" class="form-label"></label>
+                        <input type="text" class="form-control" name="employeeName" value="<%=employee.name%>">
+                    </div>
+                    <div>
+                        <br>
+                        <button type="submit" class="btn btn-primary fw-bold fs-4">更新</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

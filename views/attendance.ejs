@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+    rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" 
+    crossorigin="anonymous">
+    <script src="app.js"></script>
+    <title>Attendance</title>
+</head>
+<body>
+    <h1 class="text-center mt-4 text-info">勤怠打刻</h1>
+    <div class="container mt-4">
+        <span class="employee-name-box fw-bold">名前: <%= employee.name %></span>
+        <br>
+        <br>
+        <br>
+        <br>
+        <div class="clockPlace ">
+            <div id="digital-clock"></div>
+            <script>
+                function showClock() {
+                    var now = new Date();
+                    var nowYear = now.getFullYear(); 
+                    var nowMonth = now.getMonth() + 1; 
+                    var nowDate = now.getDate();
+                    var nowHours = now.getHours();
+                    var nowMinutes = now.getMinutes();
+                    var nowSecond = now.getSeconds();
+                    
+                    var dateTimeString = `${nowYear}年${nowMonth}月${nowDate}日 ${nowHours}時${nowMinutes}分${nowSecond}秒`;
+                    document.getElementById("digital-clock").innerHTML = dateTimeString;
+                }
+                showClock();
+                setInterval(showClock, 1000);
+            </script>
+        </div>
+       <br>
+
+
+       <div class="center-buttons">
+            <!-- 出勤 -->
+            <form action="/check_in/<%= employee.id %>" method="post" id="checkInForm">
+                <button class="btn btn-primary btn-large text-light fw-bold" type="submit">出勤</button>
+            </form>
+            <script>
+                document.getElementById('checkInForm').addEventListener('submit', function (e) {
+                e.preventDefault(); 
+            
+                let messageElement = document.getElementById('message');
+                let currentTime = new Date();
+                let hours = currentTime.getHours();
+                let minutes = currentTime.getMinutes();
+            
+                messageElement.innerText = hours + "時" + minutes + "分に出勤しました";
+                messageElement.style.display = 'block';
+            
+                // フォームのデフォルトの動作を遅延させる
+                setTimeout(function () {
+                    document.getElementById('checkInForm').submit();
+                }, 1000);
+                });
+            </script>
+
+            <!-- 休憩開始 -->
+            <form action="/break_start/<%= employee.id %>" method="post" id="breakStartForm">
+                <button class="btn btn-primary btn-large text-light fw-bold" type="submit">休憩開始</button>
+            </form>
+            <script>
+                document.getElementById('breakStartForm').addEventListener('submit', function (e) {
+                e.preventDefault(); 
+            
+                let messageElement = document.getElementById('message');
+                let currentTime = new Date();
+                let hours = currentTime.getHours();
+                let minutes = currentTime.getMinutes();
+            
+                messageElement.innerText = hours + "時" + minutes + "分に休憩開始しました";
+                messageElement.style.display = 'block';
+            
+                // フォームのデフォルトの動作を遅延させる
+                setTimeout(function () {
+                    document.getElementById('breakStartForm').submit();
+                }, 1000);
+                });
+            </script>
+
+           
+
+            <!-- 休憩終了 -->
+            <form action="/break_end/<%= employee.id %>" method="post" id="breakEndForm">
+                <button class="btn btn-primary btn-large text-light fw-bold" type="submit">休憩終了</button>
+            </form>
+            <script>
+                document.getElementById('breakEndForm').addEventListener('submit', function (e) {
+                e.preventDefault(); 
+            
+                let messageElement = document.getElementById('message');
+                let currentTime = new Date();
+                let hours = currentTime.getHours();
+                let minutes = currentTime.getMinutes();
+            
+                messageElement.innerText = hours + "時" + minutes + "分に休憩終了しました";
+                messageElement.style.display = 'block';
+            
+                // フォームのデフォルトの動作を遅延させる
+                setTimeout(function () {
+                    document.getElementById('breakEndForm').submit();
+                }, 1000);
+                });
+            </script>
+
+
+            <!-- 退勤 -->
+            <form action="/check_out/<%= employee.id %>" method="post" id="checkOutForm">
+                <button class="btn btn-primary btn-large text-light fw-bold" type="submit">退勤</button>
+            </form>
+            <script>
+                document.getElementById('checkOutForm').addEventListener('submit', function (e) {
+                e.preventDefault(); 
+            
+                let messageElement = document.getElementById('message');
+                let currentTime = new Date();
+                let hours = currentTime.getHours();
+                let minutes = currentTime.getMinutes();
+            
+                messageElement.innerText = hours + "時" + minutes + "分に退勤しました";
+                messageElement.style.display = 'block';
+            
+                // フォームのデフォルトの動作を遅延させる
+                setTimeout(function () {
+                    document.getElementById('checkOutForm').submit();
+                }, 1000);
+                });
+            </script>
+
+        </div>
+    </div>
+    <br>
+    <br>
+    <div id="message" class="text-center h1 mt-4" style="display: none;"></div>
+    <br>
+    <br>
+    <br>
+    <div class="text-center">
+        <a href="/" class="btn btn-secondary btn-lg mt-3 ">ホーム画面に戻る</a>
+    </div>
+</body>
+
+<style>
+  /* 名前を囲むスタイル */
+  .employee-name-box {
+      padding: 10px; /* 内側の余白 */
+      border: 2px solid #007BFF; /* 太枠線の色 */
+      border-radius: 10px; /* 角丸 */
+      background-color: #E1F0FF; /* 背景色 (薄い水色) */
+  }
+  .btn-large {
+       padding: 20px 40px; /* ボタンの大きさを調整 */
+       font-size: 24px; /* ボタンのテキストのサイズを調整 */
+       margin-right: 20px; /* ボタン同士の右側のマージンを追加 */
+        }
+        .center-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 30vh; /* ボタンをページの中央に配置 */
+        }
+        #digital-clock {
+    font-size: 35px;
+    font-weight: bold;
+    width: 50%; /* 枠線のサイズを含めて幅を調整 */
+    height: 60px;
+    border: 5px solid ; /* ボーダーのスタイル修正 */
+    background-color:whitesmoke;
+    display: flex;
+    justify-content: center; /* テキストを水平中央に配置 */
+    align-items: center; /* テキストを垂直中央に配置 */
+    border-radius: 5px;
+    padding: 10px; /* 余白の調整 */
+}
+
+ 
+
+ .clockPlace {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 10vh; /* ページの高さいっぱいに配置 */}
+
+</style>
+
+
+
+</html>

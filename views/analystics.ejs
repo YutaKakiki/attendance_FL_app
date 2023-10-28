@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
+
+    <script src="/app.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+    rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" 
+    crossorigin="anonymous">
+    <title>FL Analytics</title>
+</head>
+<body>
+  <h1 class="text-info">FLコスト分析</h1>
+  
+  <div class="container">
+    <div class="center-content">
+      <h2 class="titleMonth">今月のFLコスト</h2>
+      <div class="analText">
+        <p>今月のFL比率は<span> <%= monthFL[0].FLcost %></span>％です</p>
+        <p>FLコストは<span> <%= elementFL[0].realFL %></span>円であり、食材費(F)=<span><%=elementFL[0].foodCost%></span>円、人件費(L)=<span><%=elementFL[0].labor%></span>円の内訳となっています</p>
+        <p id="ifMessage"></p>
+      </div>
+      <canvas id="FL"></canvas>
+    </div>
+  </div>
+  <h2 class="yearRatio">今年のFL比率推移グラフ</h2>
+  <div  style="height: 60%; width: 80%; margin-bottom: 2px; position: relative; left: 120px; top: 50px;"> 
+    <canvas id="allFl"></canvas>
+  </div>
+
+
+
+  <script>
+    window.onload = () => {
+
+      //今月のFLグラフ
+      // サーバーサイドから渡されたデータを取得(赤線が出ているが、処理に問題はないとみている。)
+      const monthFL = <%- JSON.stringify(monthFL) %>;
+
+      if (monthFL.length > 0) {
+        let chart = document.querySelector("#FL").getContext("2d");
+
+        new Chart(chart, {
+          type: "pie", 
+          data: {
+            labels: ["FL", " "],
+            datasets: [{
+              backgroundColor:["#1e90ff","#a9a9a9"],
+              data: [monthFL[0].FLcost, 100 - monthFL[0].FLcost]
+            }]
+          },
+          options: {
+            responsive: false,
+          }
+        });
+      } else {
+        console.error('FLデータが見つかりません。');
+      }
+      
+      //FL比率推移グラフ
+      const readAllFl=<%-JSON.stringify(allFL)%>;
+
+      let allChart= document.querySelector("#allFl").getContext("2d");
+
+      new Chart(allChart,{
+        type:"line",
+        data:{
+          labels:readAllFl.map(dataPoint => dataPoint.month + "月"),
+          datasets:[
+            {
+              label:"FL比率",
+              data: readAllFl.map(dataPoint => dataPoint.FLcost),
+              borderColor:"#4169e1",
+              backgroundColor:"#4169e1",
+              lineTension:0,
+              borderWidth:2,
+            }
+          ]},
+          options: {
+              scales: {
+                  y: {
+                      min: 0,
+                      max: 100,
+                      grid:{
+                        color:"#c0c0c0"
+                      }
+                      
+                  }, 
+                  x:{
+                    grid:{
+                        color:"#c0c0c0"
+                      }
+                  }
+                }
+      }});
+
+      const drawBackGround=(target)=>{
+        allChart.fillstyle="black"
+      }
+      
+      // 分析メッセージを表示　
+      
+
+      let insert=document.getElementById("ifMessage");
+      let differenceFL=Math.round(<%= elementFL[0].realFL %>-<%= elementFL[0].idealFL %>);
+
+      //FL率50％以上の時に表示するメッセージ
+      if(<%= monthFL[0].FLcost %> > 50){
+        insert.textContent=
+        `今月の売り上げは<%= elementFL[0].proceeds %>円でしたので、理想のFL比率【50%以下】を達成するためには、
+         FLコストを<%= elementFL[0].idealFL %>円に抑えることが理想でしたが、${differenceFL}円の超過がみられます
+
+        ▶改善策として、次のような提案を挙げます
+        　　・来月は食材費を削減してみましょう
+        　　・来月は従業員らの総労働時間を削減するために、
+        　　　 ➡一日あたりの勤務人数を減らしてみましょう
+        　　　 ➡一日あたりの営業時間を減らしてみましょう
+        　　　 ➡時給設定額の見直しをしてみましょう
+
+        来月の営業活動を効率的に行うために、《来月のFL計画》を実施しましょう
+        FL比率【50%】を下回れるように計画を立てて来月も頑張りましょう
+        `;
+        
+      //FL率50以下の時に表示するメッセージ
+      } else {
+        insert.textContent=
+        `理想のFL比率【50%以下】を達成できているようです
+        
+        来月の営業活動をさらに効率的に行うために、《来月のFL計画》を実施しましょう
+        
+        FL比率<%= monthFL[0].FLcost %>をさらに下回れるように計画を立てて来月も頑張りましょう
+        
+        
+        `;
+      }
+
+    }
+  </script>
+<div>
+  
+  <h2 class="nextMonth">来月のFL計画</h2>
+  <br>
+  <div class="message">
+    <p>今月のFL分析を踏まえて、来月のFL比率の目標値を試算してみましょう</p>
+    <p>来月の売り上げ目標額と達成したいFL比率を入力し、理想のFLコストをみてみましょう</p>
+  </div>
+  
+  <form>
+    <div class="form-section">
+        <p>来月の売り上げ目標</p>
+        <input type="number" name="goalProceeds" style="width: 400px;">
+        <br>
+        <br>
+        <p>来月のFL比率目標</p>
+        <p><input type="number" name="goalFlRatio" class="nextFlForm" style="width: 50px;">%</p>
+    </div>
+    
+    <div class="button-container">
+        <input type="button" onclick="calc()" class="calcBtn" value="FLを試算" id="calcBtn">
+    </div>
+</form>
+<br>
+<p id="nextFL"></p>
+
+
+
+
+
+
+<script>
+  // ページ読み込み時にローカルストレージからフォームの値を取得
+  document.addEventListener("DOMContentLoaded", () => {
+      const goalProceedsInput = document.querySelector('[name="goalProceeds"]');
+      const goalFlRatioInput = document.querySelector('[name="goalFlRatio"]');
+      
+      const storedGoalProceeds = localStorage.getItem("goalProceeds");
+      const storedGoalFlRatio = localStorage.getItem("goalFlRatio");
+      
+      if (storedGoalProceeds) {
+          goalProceedsInput.value = storedGoalProceeds;
+      }
+      if (storedGoalFlRatio) {
+          goalFlRatioInput.value = storedGoalFlRatio;
+      }
+  });
+  
+  const calc = () => {
+      const goalProceeds = parseFloat(document.querySelector('[name="goalProceeds"]').value);
+      const goalFlRatio = parseFloat(document.querySelector('[name="goalFlRatio"]').value);
+      
+      if (!isNaN(goalProceeds) && !isNaN(goalFlRatio)) {
+          const calcNextFL = Math.round(goalProceeds * goalFlRatio / 100);
+          const goalFlRatioInput = goalFlRatio + "%";
+          const breakDownFood = Math.round(calcNextFL * 0.6);
+          const breakDownLabor = Math.round(calcNextFL * 0.4);
+          const differenceFood=Math.round(breakDownFood-<%=elementFL[0].foodCost%>);
+          const differenceLabor=Math.round(breakDownLabor-<%=elementFL[0].labor%>);
+  
+          // フォームの値をローカルストレージに保存
+          localStorage.setItem("goalProceeds", goalProceeds);
+          localStorage.setItem("goalFlRatio", goalFlRatio);
+  
+          document.getElementById("nextFL").innerText = 
+          `来月はFLコストを${calcNextFL}円に抑えることを目指しましょう
+
+           FL比率${goalFlRatioInput}のうち、FLコストの内訳の目安は、
+           食材費（F）=${breakDownFood}円、人件費（L）=${breakDownLabor}円です
+
+           今月の食材費（F）は<%=elementFL[0].foodCost%>円でしたので、その差は${differenceFood}円です。
+           また、今月の人件費（L）は<%=elementFL[0].labor%>円でしたので、その差は${differenceLabor}円です
+
+           来月もFLコストを意識して計画的に利益の向上を目指しましょう`
+      } else {
+          document.getElementById("nextFL").innerText = "正しい数値を入力してください。";
+      }
+  }
+</script>
+
+
+
+
+
+
+
+</div>
+<a href="/management" class="homeButton">前の画面に戻る</a>
+</body>
+
+
+<style>
+  h1 {
+    text-align: center;
+    margin-top: 30px;
+    font-weight: bold;
+    color: #64d7db;
+    margin-top: 200px;
+    margin-bottom: 300px;
+    position: relative;
+    bottom: 150px;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+  }
+  
+
+  .center-content {
+    text-align: center;
+  }
+
+  #FL{
+    width: 50%;
+    max-width: 350px;
+    margin-left: 600px;
+    margin-top: 60px;
+    position: relative; /* 今の位置を基準 */
+    bottom:500px; /* 上から10px */
+    left: 150px;
+  }
+
+  .titleMonth {
+    font-size: 30px;
+    padding: 1em;
+    width: 100%;
+    border: 1px solid #ccc; /* 枠線 */
+    background-color: #fff; /* 背景色 */
+    box-shadow: 1px 1px 2px #ccc;
+    margin-top: 10px;
+    margin-bottom: 250px;
+  }
+
+
+  .nextMonth{
+    display: flex;
+    font-size: 30px;
+    padding: 1em;
+    width: 85%;
+    border: 1px solid #ccc; /* 枠線 */
+    background-color: #fff; /* 背景色 */
+    box-shadow: 1px 1px 2px #ccc;
+    margin-top: 100px;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    position: relative; 
+    left: 100px;
+
+  }
+  p{
+    font-size: 20px;
+    color:black;
+    text-align: left;
+    font-weight: bold
+    ;
+  }
+
+.calcBtn{
+  width: 200px;
+  height: 100px;
+  border: 1px solid #64d7db;
+  background-color: #64d7db;
+  color: #fff;
+  font-weight: bold;
+  font-size: 30px;
+  position: relative;
+  left: 500px;
+  
+
+  }
+
+  form {
+    display: flex;
+    width: 55%;
+    flex-direction: column;
+    margin: 20px auto;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px 0px #888888;
+    border-radius: 5px;
+    justify-content: center;
+
+}
+
+.message{
+  position: relative;
+  left: 330px;
+}
+
+#nextFL{
+  text-align: center;
+
+
+}
+
+.homeButton{
+    display: block;
+    width: 200px;
+    margin: 100px auto;
+    text-align: center;
+    padding: 10px;
+    background-color: #585f66;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+#ifMessage {
+  white-space: pre-line;
+}
+
+.analText{
+  position: relative;
+  bottom: 230px;
+
+
+}
+
+#allFl{
+  margin-bottom: 30px;
+  width: 50%;
+  height: 20%;
+}
+
+.yearRatio{
+  display: flex;
+    font-size: 30px;
+    padding: 1em;
+    width: 85%;
+    border: 1px solid #ccc; /* 枠線 */
+    background-color: #fff; /* 背景色 */
+    box-shadow: 1px 1px 2px #ccc;
+    margin-top: 100px;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    position: relative; 
+    left: 100px;
+
+}
+
+span{
+  color:#3e41ec;
+}
+
+</style>
+
+</html>
+
+
+<!-- insert into FL(year,month,FLcost) values(2023,6,60);
+insert into FL(year,month,FLcost) values(2023,5,66);
+insert into FL(year,month,FLcost) values(2023,4,44); -->
