@@ -30,7 +30,7 @@ app.set('view engine', 'ejs');
 // ホーム画面のルート
 app.get('/', (req, res) => {
   connection.query('SELECT * FROM employees order by id', (error, results) => {
-    res.render('index.ejs', { employees: results });
+    res.render('index.html', { employees: results });
   });
 });
 
