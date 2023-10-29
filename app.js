@@ -27,6 +27,7 @@ app.use(express.urlencoded({ extended: false }));
 // EJSテンプレートエンジンを設定
 app.set('view engine', 'ejs'); 
 
+
 // ホーム画面のルート
 app.get('/', (req, res) => {
   connection.query('SELECT * FROM employees order by id', (error, results) => {
