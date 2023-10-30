@@ -346,24 +346,5 @@ app.get("/analystics",(req,res)=>{
 
 app.listen(3000);
 
-
-
-
-
-
-// INSERT INTO records (id, check_in, break_start, break_end, check_out, dateRecord) VALUES (1, "07:00:00", "00:00:00", "00:00:00","00:00:00","2023-04-01");
-// INSERT INTO records (id, check_in, break_start, break_end, check_out, dateRecord) VALUES (2, "09:00:00", "00:00:00", "00:00:00","00:00:00","2023-04-01");
-// INSERT INTO records (id, check_in, break_start, break_end, check_out, dateRecord) VALUES (3, "15:00:00", "00:00:00", "00:00:00","00:00:00","2023-04-01");
-// INSERT INTO records (id, check_in, break_start, break_end, check_out, dateRecord) VALUES (4, "06:00:00", "00:00:00", "00:00:00","00:00:00","2023-04-01");
-// INSERT INTO records (id, check_in, break_start, break_end, check_out, dateRecord) VALUES (5, "09:00:00", "00:00:00", "00:00:00","00:00:00","2023-04-01");
-
-// INSERT INTO records (id, check_in, break_start, break_end, check_out, dateRecord) VALUES (1, "00:00:00", "00:00:00", "00:00:00","18:00:00","2023-04-01");
-// INSERT INTO records (id, check_in, break_start, break_end, check_out, dateRecord) VALUES (2, "00:00:00", "00:00:00", "00:00:00","14:00:00","2023-04-01");
-// INSERT INTO records (id, check_in, break_start, break_end, check_out, dateRecord) VALUES (3, "00:00:00", "00:00:00", "00:00:00","17:00:00","2023-04-01");
-// INSERT INTO records (id, check_in, break_start, break_end, check_out, dateRecord) VALUES (4, "00:00:00", "00:00:00", "00:00:00","20:00:00","2023-04-01");
-// INSERT INTO records (id, check_in, break_start, break_end, check_out, dateRecord) VALUES (5, "00:00:00", "00:00:00", "00:00:00","19:00:00","2023-04-01");
-
-// INSERT INTO records (id, check_in, break_start, break_end, check_out, dateRecord) VALUES (1, "00:00:00", "00:00:00", "00:00:00","19:00:00","2023-08-01");
-
   
 
