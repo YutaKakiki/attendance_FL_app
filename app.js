@@ -56,9 +56,15 @@ app.post('/add', (req, res) => {
 // 従業員を削除する
 app.post('/delete/:id', (req, res) => {
   connection.query('DELETE FROM employees WHERE id = ?', [req.params.id], (error, results) => {
-    res.redirect('/');
+    if (error) {
+      console.error('従業員の削除中にエラーが発生しました: ' + error);
+      res.status(500).send('従業員の削除中にエラーが発生しました');
+    } else {
+      res.redirect('/');
+    }
   });
 });
+
 
 // 従業員名編集画面のルート
 app.get('/edit/:id', (req, res) => {
