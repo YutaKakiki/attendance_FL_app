@@ -18,9 +18,9 @@
           <th>勤務時間</th>
           <th>給与</th>
         </tr>
-        <% data.forEach((row) => { %>
+        <!-- EJSでjavasriptを埋め込み、従業員ごとに労働時間と給与額を表示 -->
+        <% salaryData.forEach((row) => { %>
           <tr>
-            
             <td><%= row.id %></td>
             <td><%= row.name %></td>
             <td><%= row.workTime %></td>
@@ -29,8 +29,8 @@
         <% }); %>
       </table>
       
+      <!-- 時給額、計算期間設定フォーム -->
       </table>
-      
         <form action="/calculate" method="post">
           <br>
             <label for="hourly_rate"></label>
@@ -66,7 +66,9 @@
     </script>
 
     <!-- 抽出期間フォームのデータ保持 -->
+
     <script>
+      // 開始期間
       // ページがロードされたときにローカルストレージから値を取得してフォームに設定
       document.addEventListener('DOMContentLoaded', function() {
         const dateFromInput = document.getElementById('dateFrom');
@@ -85,9 +87,9 @@
 
         localStorage.setItem('dateFrom', dateFrom);
       });
-    </script>
 
-    <script>
+
+      // 終了期間
       // ページがロードされたときにローカルストレージから値を取得してフォームに設定
       document.addEventListener('DOMContentLoaded', function() {
         const dateToInput = document.getElementById('dateTo');
@@ -118,6 +120,7 @@
             <th>月</th>
             <th>人件費</th>
         </tr>
+        <!-- EJSでjavascriptを埋め込み、月ごとの人件費を取得して表示 -->
         <% monthlyData.forEach(function(data) { %>
             <tr>
                 <td><%= data.year %></td>
@@ -129,6 +132,7 @@
     <br>
     <br>
     <br>
+
     <h2 class="text-info">人件費(年)</h2>
     <br>
     <table class="table">
@@ -136,18 +140,22 @@
         <th>年</th>
             <th>人件費</th>
           </tr>
+        <!-- EJSでjavascriptを埋め込み、年ごとの人件費を取得して表示 -->
         <% yearlyData.forEach(function(data) { %>
           <tr>
-            <td><%= data.year %></td>
+                <td><%= data.year %></td>
                 <td><%= data.yearlyLabor %> 円</td>
               </tr>
               <% }); %>
             </table>
+
             <br>
             <br>
             <br>
 
             <h1 class="text-info">FLコスト分析</h2>
+
+            <!-- FL分析に必要な要素を入力するフォーム-->
             <form action="/postElementFL" method="post" id="element">
               <p>今月の食材費</p>
               <input type="number" name="foodCost" placeholder="今月の食材費を入力" id="foodCost">
@@ -187,18 +195,20 @@
                     localStorage.setItem('foodCost', foodCost);
                     localStorage.setItem('proceeds', proceeds);
                     
-                    // 成功メッセージを表示します（必要に応じて実装できます）
+                    // 登録完了メッセージを表示
                     let messageElement = document.getElementById('message');
                     messageElement.innerText = "登録しました";
                     messageElement.style.display = 'block';
 
-                    // フォームの送信を遅延させます
+                    // フォームの送信を遅延（登録メッセージをしっかり見れるようにするため）
                     setTimeout(function () {
                       document.getElementById('element').submit();
                     }, 1000);
                   });
             </script>
+
               <br>
+              <!-- 登録完了メッセージを表示するスペース -->
               <div id="message" class="text-center h1 mt-4" style="display: none;"></div>
               <span class="arrow-down">&#8595;</span>
               <br>
@@ -222,6 +232,7 @@
             <p>今月の食材費と売上高を入力し、今月のFL比率が50%以下かどうかを確認し、今後の利益率の増加に繋げましょう</p>
   
     <a href="/" class="button">ホーム画面に戻る</a>
+    
   </body>
 
 

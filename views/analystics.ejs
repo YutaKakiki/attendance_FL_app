@@ -37,7 +37,7 @@
   <script>
     window.onload = () => {
 
-      //今月のFLグラフ
+      //今月のFLコスト比率を円グラフで表示
       // サーバーサイドから渡されたデータを取得(赤線が出ているが、処理に問題はないとみている。)
       const monthFL = <%- JSON.stringify(monthFL) %>;
 
@@ -61,7 +61,7 @@
         console.error('FLデータが見つかりません。');
       }
       
-      //FL比率推移グラフ
+      //FL比率推移を折れ線グラフで表示
       const readAllFl=<%-JSON.stringify(allFL)%>;
 
       let allChart= document.querySelector("#allFl").getContext("2d");
@@ -103,8 +103,6 @@
       }
       
       // 分析メッセージを表示　
-      
-
       let insert=document.getElementById("ifMessage");
       let differenceFL=Math.round(<%= elementFL[0].realFL %>-<%= elementFL[0].idealFL %>);
 
@@ -219,13 +217,6 @@
       }
   }
 </script>
-
-
-
-
-
-
-
 </div>
 <a href="/management" class="homeButton">前の画面に戻る</a>
 </body>
@@ -261,8 +252,8 @@
     max-width: 350px;
     margin-left: 600px;
     margin-top: 60px;
-    position: relative; /* 今の位置を基準 */
-    bottom:500px; /* 上から10px */
+    position: relative; 
+    bottom:500px; 
     left: 150px;
   }
 
@@ -270,8 +261,8 @@
     font-size: 30px;
     padding: 1em;
     width: 100%;
-    border: 1px solid #ccc; /* 枠線 */
-    background-color: #fff; /* 背景色 */
+    border: 1px solid #ccc; 
+    background-color: #fff; 
     box-shadow: 1px 1px 2px #ccc;
     margin-top: 10px;
     margin-bottom: 250px;
@@ -283,8 +274,8 @@
     font-size: 30px;
     padding: 1em;
     width: 85%;
-    border: 1px solid #ccc; /* 枠線 */
-    background-color: #fff; /* 背景色 */
+    border: 1px solid #ccc; 
+    background-color: #fff; 
     box-shadow: 1px 1px 2px #ccc;
     margin-top: 100px;
     justify-content: center;
@@ -316,7 +307,7 @@
 
   }
 
-  form {
+form {
     display: flex;
     width: 55%;
     flex-direction: column;
@@ -375,8 +366,8 @@
     font-size: 30px;
     padding: 1em;
     width: 85%;
-    border: 1px solid #ccc; /* 枠線 */
-    background-color: #fff; /* 背景色 */
+    border: 1px solid #ccc; 
+    background-color: #fff; 
     box-shadow: 1px 1px 2px #ccc;
     margin-top: 100px;
     justify-content: center;
@@ -394,8 +385,3 @@ span{
 </style>
 
 </html>
-
-
-<!-- insert into FL(year,month,FLcost) values(2023,6,60);
-insert into FL(year,month,FLcost) values(2023,5,66);
-insert into FL(year,month,FLcost) values(2023,4,44); -->

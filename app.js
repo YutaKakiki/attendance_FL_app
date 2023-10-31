@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: false }));
 app.set('view engine', 'ejs'); 
 
 
-// ホーム画面のルート
+// ホーム画面（従業員一覧画面）のルート
 app.get('/', (req, res) => {
   connection.query('SELECT * FROM employees order by id', (error, results) => {
     res.render('home.ejs', { employees: results });
@@ -89,7 +89,7 @@ app.get('/attendance/:id', (req, res) => {
   });
 });
 
-//出勤
+//出勤ボタンを押すとDBのrecordsテーブルに打刻情報を挿入
 app.post('/check_in/:id', (req, res) => {
   const employeeId = req.params.id;
   connection.query('INSERT INTO records (id, check_in, break_start, break_end, check_out, dateRecord) VALUES (?, now(), "00:00:00", "00:00:00","00:00:00",now())', [employeeId], (error, results) => {
@@ -103,7 +103,7 @@ app.post('/check_in/:id', (req, res) => {
   });
 });
 
-// 休憩開始
+// 休憩開始を押すとDBのrecordsテーブルに打刻情報を挿入
 app.post('/break_start/:id', (req, res) => {
   const employeeId = req.params.id;
 
@@ -118,7 +118,7 @@ app.post('/break_start/:id', (req, res) => {
   });
 });
 
-// 休憩終了
+// 休憩終了を押すとDBのrecordsテーブルに打刻情報を挿入
 app.post('/break_end/:id', (req, res) => {
   const employeeId = req.params.id;
 
@@ -133,7 +133,7 @@ app.post('/break_end/:id', (req, res) => {
   });
 });
 
-// 退勤
+// 退勤を押すとDBのrecordsテーブルに打刻情報を挿入
 app.post('/check_out/:id', (req, res) => {
   const employeeId = req.params.id;
 
@@ -150,7 +150,8 @@ app.post('/check_out/:id', (req, res) => {
 
 // 管理者画面へのルート
 app.get("/management", (req, res) => {
-  const query = `
+  // 従業員ごとの労働時間と給与情報をcalculationテーブルから取得（→ページに表示）
+  const salaryQuery = `
     SELECT calculation.id, employees.name, employees.id, calculation.workTime, calculation.salary
     FROM calculation
     JOIN employees ON calculation.id = employees.id
@@ -160,16 +161,14 @@ app.get("/management", (req, res) => {
   // 月ごとの人件費を取得
   const monthlyLaborQuery = `select year,month,sum(labor) as monthlyLabor from laborSum where year=year(now()) group by year,month order by year,month;`;
 
-
   // 年ごとの合計人件費を取得
   const yearlyLaborQuery = `select year,sum(labor) as yearlyLabor from laborSum group by year order by year;`;
 
-  connection.query(query, (error, results) => {
+  connection.query(salaryQuery, (error, results) => {
     if (error) {
-      console.error("Error fetching data:", error);
-      res.status(500).send("Error fetching data");
+      console.error("給与情報の取得中にエラーが発生しました:", error);
+      res.status(500).send("給与情報の取得中にエラーが発生しました");
     } else {
-      // 月ごとの人件費と年ごとの合計人件費の取得
       connection.query(monthlyLaborQuery, (monthlyError, monthlyResults) => {
         if (monthlyError) {
           console.error('月ごとの人件費の計算中にエラーが発生しました: ' + monthlyError);
@@ -181,7 +180,7 @@ app.get("/management", (req, res) => {
               res.status(500).send('年ごとの人件費の自動計算中にエラーが発生しました');
             } else {
               console.log('人件費の計算が正常に完了しました');
-              res.render("management.ejs", { data: results, monthlyData: monthlyResults, yearlyData: yearlyResults });
+              res.render("management.ejs", { salaryData: results, monthlyData: monthlyResults, yearlyData: yearlyResults });
             }
           });
         }
@@ -193,10 +192,12 @@ app.get("/management", (req, res) => {
 
 //自動計算
 app.post("/calculate", (req, res) => {
+  //時給額・計算期間フォームから入力情報を取得
   const hourlyRate = req.body.hourly_rate;
   const dateFrom = req.body.dateFrom;
   const dateTo = req.body.dateTo;
 
+  // 既存の計算結果データをクリア（「先月働いたが今月働いていない人」を併せて表示しないように）
   const deleteQuery = `DELETE FROM calculation WHERE id NOT IN (SELECT id FROM records WHERE dateRecord BETWEEN ? AND ?)`;
 
   connection.query(deleteQuery, [dateFrom, dateTo], (error3, results3) => {
@@ -206,6 +207,7 @@ app.post("/calculate", (req, res) => {
     } else {
       console.log('指定範囲外のデータ削除が正常に完了しました');
 
+ // recordsテーブルから従業員ごとの労働時間を計算しcalculationテーブルに挿入
       const upsertRecordsQuery = `
         INSERT INTO calculation (id, workTime, salary)
         SELECT id,
@@ -220,6 +222,7 @@ app.post("/calculate", (req, res) => {
         salary = VALUES(salary);
       `;
 
+// 日ごとに従業員の給与を合計した人件費をlaborSumテーブルに挿入（このテーブルから取得して月ごと/年ごとの人件費を計算）
       const calculateSum = `
         INSERT INTO laborSum (id, month, labor, year, day)
         SELECT id,
@@ -258,6 +261,8 @@ app.post("/calculate", (req, res) => {
 
 //今月の食材費と売り上げ高を登録し、FLコストを計算してDBに挿入
 app.post("/postElementFL",(req,res)=>{
+
+  // 月ごとの食材費と売上高と、月ごとの人件費（laborSumテーブルから取得）をelementForFLテーブルに挿入
   const postElement=
     `insert into elementForFL(year,month,foodCost,proceeds,labor)
     select year(now()),month(now()),?,?,sum(labor)
@@ -269,9 +274,12 @@ app.post("/postElementFL",(req,res)=>{
     proceeds=values(proceeds),
     labor=values(labor);
     `;
+
+  // 食材費と売上高入力フォームの値を取得
     const foodCost= req.body.foodCost;
     const proceeds= req.body.proceeds;
 
+ // FL比率を計算してFLテーブルに挿入
     const insertFL=`
     INSERT INTO FL (year, month, FLcost)
     SELECT year, month, ((SUM(labor) + foodCost) / proceeds) * 100
@@ -279,9 +287,8 @@ app.post("/postElementFL",(req,res)=>{
     GROUP BY year, month, foodCost,proceeds
     ON DUPLICATE KEY UPDATE 
     FLcost = VALUES(FLcost);
-    
     `;
-
+    
     connection.query(postElement,[foodCost,proceeds],(error,results)=>{
       if (error) {
         console.error('FL分析要素の登録中にエラーが発生しました: ' + error);
@@ -304,20 +311,24 @@ app.post("/postElementFL",(req,res)=>{
 })
 
 
-// FLコストを取得してページを表示
+// FLコストを取得して「ＦＬ分析」ページに表示するルート
 app.get("/analystics",(req,res)=>{
+
+  // 今月のFLコスト比率を取得
   const getMonthFL=`
     select FLcost from FL where year=year(now()) and month=month(now());
-    `
+    `;
+
+  // 今月の食材費、売上高、人件費、FLコストを取得（→分析結果に表示させる）
   const getElementFL=`
   SELECT SUM(foodCost) AS foodCost, SUM(proceeds) AS proceeds, SUM(labor) AS labor, (SUM(foodCost) + SUM(labor)) AS realFL, 0.5 * SUM(proceeds) AS idealFL
   FROM elementForFL
   WHERE year = YEAR(NOW()) AND month = MONTH(NOW())
   GROUP BY year, month;
-  
-  `
-  const getAllFL=`select*from FL where year=year(now()) order by year,month`
+  `;
 
+  //今年の、 月ごとのFL比率を全て取得（→FL比率推移グラフに表示）
+  const getAllFL=`select*from FL where year=year(now()) order by year,month`
 
   connection.query(getMonthFL,(error,results)=>{
     if (error) {
@@ -327,7 +338,6 @@ app.get("/analystics",(req,res)=>{
       console.log('FL分析の取得が正常に完了しました');
 
       connection.query(getElementFL,(error1,results1)=>{
-
         if (error1) {
           console.error('FL要素の取得中にエラーが発生しました: ' + error1);
           res.status(500).send('FL要素の取得中にエラーが発生しました');
@@ -347,7 +357,6 @@ app.get("/analystics",(req,res)=>{
     }
   })
 });
-
 
 
 app.listen(3000);
