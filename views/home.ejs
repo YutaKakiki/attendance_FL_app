@@ -43,6 +43,7 @@
           </thead>
           <tbody>
             <!-- EJSでjavascriptを埋めこみ、employeesテーブルからデータを取得して表示 -->
+            
               <% employees.forEach((employee) => { %>
                   <tr>
                       <td class="fs-3 fw-bold"><a href="/attendance/<%= employee.id %>"><%= employee.id %></a></td>
