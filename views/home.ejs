@@ -15,7 +15,6 @@
       </div>
       <br>
       <br>
-
       <div class="text-start ">
         <p class="fs-3 border border-info  border-5 rounded-1 p-2 float-start">柿木飯店</p>
       </div>
@@ -34,16 +33,13 @@
                 <th class="bg-primary text-light"></th>
                 <th class="bg-primary text-light"></th>
                 <th class="bg-primary text-light"></th>
-        
-                
-                
                   <a href="/registration" class="btn btn-success btn-lg me-3 float-end p-2 m-3 fw-bold">従業員登録</a>
             
               </tr>
           </thead>
           <tbody>
             <!-- EJSでjavascriptを埋めこみ、employeesテーブルからデータを取得して表示 -->
-            
+            <!-- employeesテーブルから取得した従業員を一覧表示 -->
               <% employees.forEach((employee) => { %>
                   <tr>
                       <td class="fs-3 fw-bold"><a href="/attendance/<%= employee.id %>"><%= employee.id %></a></td>
@@ -53,12 +49,11 @@
                       <td></td>
                       <td></td>
                       <td></td>
-
                       <td class="fs-3">
                           <form action="/delete/<%= employee.id %>" method="post">
                               <button type="submit" class="btn btn-danger mr-3">削除</button>
                               <a href="/edit/<%= employee.id %>" class="btn btn-info text-white">編集</a>
-                            </form>
+                          </form>
                       </td>
                   </tr>
               <% }); %>

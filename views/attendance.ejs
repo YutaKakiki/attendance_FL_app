@@ -12,7 +12,7 @@
 <body>
     <h1 class="text-center mt-4 text-info">勤怠打刻</h1>
     <div class="container mt-4">
-        <span class="employee-name-box fw-bold">名前: <%= employee.name %></span>
+        <span class="employee-name-box fw-bold">名前: <%= employee[0].name %></span>
         <br>
         <br>
         <br>
@@ -20,16 +20,17 @@
         <div class="clockPlace ">
             <div id="digital-clock"></div>
             <script>
-                function showClock() {
-                    var now = new Date();
-                    var nowYear = now.getFullYear(); 
-                    var nowMonth = now.getMonth() + 1; 
-                    var nowDate = now.getDate();
-                    var nowHours = now.getHours();
-                    var nowMinutes = now.getMinutes();
-                    var nowSecond = now.getSeconds();
+                const showClock=()=> {
+                    let now = new Date();
+                    let nowYear = now.getFullYear(); 
+                    let nowMonth = now.getMonth() + 1; 
+                    let nowDate = now.getDate();
+                    let nowHours = now.getHours();
+                    let nowMinutes = now.getMinutes();
+                    let nowSecond = now.getSeconds();
                     
-                    var dateTimeString = `${nowYear}年${nowMonth}月${nowDate}日 ${nowHours}時${nowMinutes}分${nowSecond}秒`;
+                    let dateTimeString = `${nowYear}年${nowMonth}月${nowDate}日 ${nowHours}時${nowMinutes}分${nowSecond}秒`;
+                    
                     document.getElementById("digital-clock").innerHTML = dateTimeString;
                 }
                 showClock();
@@ -41,9 +42,11 @@
 
        <div class="center-buttons">
             <!-- 出勤 -->
-            <form action="/check_in/<%= employee.id %>" method="post" id="checkInForm">
+            <form action="/check_in/<%= employee[0].id %>" method="post" id="checkInForm">
                 <button class="btn btn-primary btn-large text-light fw-bold" type="submit">出勤</button>
             </form>
+
+            <!--  打刻完了メッセージを表示するため-->
             <script>
                 document.getElementById('checkInForm').addEventListener('submit', function (e) {
                 e.preventDefault(); 
@@ -54,6 +57,7 @@
                 let minutes = currentTime.getMinutes();
             
                 messageElement.innerText = hours + "時" + minutes + "分に出勤しました";
+                // これ消したらメッセージが表示されない
                 messageElement.style.display = 'block';
             
                 // フォームのデフォルトの動作を遅延させる
@@ -64,9 +68,10 @@
             </script>
 
             <!-- 休憩開始 -->
-            <form action="/break_start/<%= employee.id %>" method="post" id="breakStartForm">
+            <form action="/break_start/<%= employee[0].id %>" method="post" id="breakStartForm">
                 <button class="btn btn-primary btn-large text-light fw-bold" type="submit">休憩開始</button>
             </form>
+            <!--  打刻完了メッセージを表示するため-->
             <script>
                 document.getElementById('breakStartForm').addEventListener('submit', function (e) {
                 e.preventDefault(); 
@@ -77,6 +82,7 @@
                 let minutes = currentTime.getMinutes();
             
                 messageElement.innerText = hours + "時" + minutes + "分に休憩開始しました";
+                // これ消したらメッセージが表示されない
                 messageElement.style.display = 'block';
             
                 // フォームのデフォルトの動作を遅延させる
@@ -89,9 +95,10 @@
            
 
             <!-- 休憩終了 -->
-            <form action="/break_end/<%= employee.id %>" method="post" id="breakEndForm">
+            <form action="/break_end/<%= employee[0].id %>" method="post" id="breakEndForm">
                 <button class="btn btn-primary btn-large text-light fw-bold" type="submit">休憩終了</button>
             </form>
+            <!--  打刻完了メッセージを表示するため-->
             <script>
                 document.getElementById('breakEndForm').addEventListener('submit', function (e) {
                 e.preventDefault(); 
@@ -102,6 +109,7 @@
                 let minutes = currentTime.getMinutes();
             
                 messageElement.innerText = hours + "時" + minutes + "分に休憩終了しました";
+                // これ消したらメッセージが表示されない
                 messageElement.style.display = 'block';
             
                 // フォームのデフォルトの動作を遅延させる
@@ -113,9 +121,10 @@
 
 
             <!-- 退勤 -->
-            <form action="/check_out/<%= employee.id %>" method="post" id="checkOutForm">
+            <form action="/check_out/<%= employee[0].id %>" method="post" id="checkOutForm">
                 <button class="btn btn-primary btn-large text-light fw-bold" type="submit">退勤</button>
             </form>
+            <!--  打刻完了メッセージを表示するため-->
             <script>
                 document.getElementById('checkOutForm').addEventListener('submit', function (e) {
                 e.preventDefault(); 
@@ -126,6 +135,7 @@
                 let minutes = currentTime.getMinutes();
             
                 messageElement.innerText = hours + "時" + minutes + "分に退勤しました";
+                // これ消したらメッセージが表示されない
                 messageElement.style.display = 'block';
             
                 // フォームのデフォルトの動作を遅延させる
@@ -139,6 +149,7 @@
     </div>
     <br>
     <br>
+    <!-- 打刻完了メッセージの場所 -->
     <div id="message" class="text-center h1 mt-4" style="display: none;"></div>
     <br>
     <br>

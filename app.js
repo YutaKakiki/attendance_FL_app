@@ -3,7 +3,11 @@ const express = require('express');
 const app = express();
 const mysql = require('mysql');
 
-// mysqlの接続情報
+app.listen(3001, () => {
+  console.log("Server is running on port 3001");
+});
+
+// mysqlの接続情報を設定
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
@@ -18,30 +22,40 @@ connection.connect((err) => {
     console.log('error connecting: ' + err.stack);
     return;
   }
-  console.log('success');
+  console.log('You can connect mysql');
 });
 
-// フォームを受け取るためのコード
+// フォームを受け取るためのコード（これにより、req.bodyを通じてフォームにアクセス可能に。）
 app.use(express.urlencoded({ extended: false }));
 
 // EJSテンプレートエンジンを設定
 app.set('view engine', 'ejs'); 
 
 
-// ホーム画面（従業員一覧画面）のルート
+// ホーム画面（従業員一覧画面）のルーティング
+//home.ejs（ホーム画面＝従業員一覧の画面がはじめに呼び出される）
 app.get('/', (req, res) => {
+  // employeesテーブルから従業員を取得
   connection.query('SELECT * FROM employees order by id', (error, results) => {
-    res.render('home.ejs', { employees: results });
+    if (error) {
+      console.error('従業員の取得中にエラーが発生しました' + error);
+      res.status(500).send('従業員の取得中にエラーが発生しました');
+    } else {
+      res.render('home.ejs', { employees: results});
+    }
   });
 });
 
-// 従業員登録画面のルート
+
+// 従業員登録画面のルーティング
 app.get('/registration', (req, res) => {
   res.render('registration.ejs');
 });
 
+
 // 従業員を登録する
 app.post('/add', (req, res) => {
+  // フォームから値を取得
   const addedName = req.body.addedName;
   connection.query('INSERT INTO employees (name) VALUES (?)', [addedName], (error, results) => {
     if (error) {
@@ -52,6 +66,7 @@ app.post('/add', (req, res) => {
     }
   });
 });
+
 
 // 従業員を削除する
 app.post('/delete/:id', (req, res) => {
@@ -66,28 +81,32 @@ app.post('/delete/:id', (req, res) => {
 });
 
 
-// 従業員名編集画面のルート
+// 従業員名編集画面のル―ティング
+// フォーム内に、既存の名前を表示しておくためにemplyeesテーブルから値を渡す。
 app.get('/edit/:id', (req, res) => {
   connection.query('SELECT * FROM employees WHERE id = ?', [req.params.id], (error, results) => {
-    res.render('edit.ejs', { employee: results[0] });
+    res.render('edit.ejs', { employee: results });
   });
 });
 
 // 従業員名の編集（更新）
 app.post('/update/:id', (req, res) => {
+  // フォームの値を受け取る
   const employeeName = req.body.employeeName;
   connection.query('UPDATE employees SET name = ? WHERE id = ?', [employeeName, req.params.id], (error, results) => {
     res.redirect('/');
   });
 });
 
-// 従業員ごとの勤怠打刻画面へのルート
+
+// 従業員ごとの勤怠打刻画面へのルーティング
+// 指定の従業員を表示させるためにemployeesテーブルの値を渡す
 app.get('/attendance/:id', (req, res) => {
-  const employeeId = req.params.id;
-  connection.query('SELECT * FROM employees WHERE id = ?', [employeeId], (error, employee) => {
-    res.render('attendance.ejs', { employee: employee[0] });
+  connection.query('SELECT * FROM employees WHERE id = ?', [req.params.id], (error, results) => {
+  res.render('attendance.ejs', { employee: results});
   });
 });
+
 
 //出勤ボタンを押すとDBのrecordsテーブルに打刻情報を挿入
 app.post('/check_in/:id', (req, res) => {
@@ -133,6 +152,7 @@ app.post('/break_end/:id', (req, res) => {
   });
 });
 
+
 // 退勤を押すとDBのrecordsテーブルに打刻情報を挿入
 app.post('/check_out/:id', (req, res) => {
   const employeeId = req.params.id;
@@ -147,6 +167,7 @@ app.post('/check_out/:id', (req, res) => {
     }
   });
 });
+
 
 // 管理者画面へのルート
 app.get("/management", (req, res) => {
@@ -180,7 +201,7 @@ app.get("/management", (req, res) => {
               res.status(500).send('年ごとの人件費の自動計算中にエラーが発生しました');
             } else {
               console.log('人件費の計算が正常に完了しました');
-              res.render("management.ejs", { salaryData: results, monthlyData: monthlyResults, yearlyData: yearlyResults });
+              res.render("management.ejs", { salaryDatas: results, monthlyDatas: monthlyResults, yearlyDatas: yearlyResults });
             }
           });
         }
@@ -200,9 +221,9 @@ app.post("/calculate", (req, res) => {
   // 既存の計算結果データをクリア（「先月働いたが今月働いていない人」を併せて表示しないように）
   const deleteQuery = `DELETE FROM calculation WHERE id NOT IN (SELECT id FROM records WHERE dateRecord BETWEEN ? AND ?)`;
 
-  connection.query(deleteQuery, [dateFrom, dateTo], (error3, results3) => {
-    if (error3) {
-      console.error('指定範囲外のデータ削除中にエラーが発生しました: ' + error3);
+  connection.query(deleteQuery, [dateFrom, dateTo], (error1, results1) => {
+    if (error1) {
+      console.error('指定範囲外のデータ削除中にエラーが発生しました: ' + error1);
       res.status(500).send('指定範囲外のデータ削除中にエラーが発生しました');
     } else {
       console.log('指定範囲外のデータ削除が正常に完了しました');
@@ -236,17 +257,16 @@ app.post("/calculate", (req, res) => {
         ON DUPLICATE KEY UPDATE 
         labor=VALUES(labor);
       `;
-
-      connection.query(upsertRecordsQuery, [hourlyRate, dateFrom, dateTo], (error1, results1) => {
-        if (error1) {
-          console.error('給与自動計算中にエラーが発生しました: ' + error1);
+      connection.query(upsertRecordsQuery, [hourlyRate, dateFrom, dateTo], (error2, results2) => {
+        if (error2) {
+          console.error('給与自動計算中にエラーが発生しました: ' + error2);
           res.status(500).send('給与自動計算中にエラーが発生しました');
         } else {
           console.log('給与自動計算が正常に完了しました');
           
-          connection.query(calculateSum, [hourlyRate, dateFrom, dateTo], (error2, results2) => {
-            if (error2) {
-              console.error('人件費計算中にエラーが発生しました: ' + error2);
+          connection.query(calculateSum, [hourlyRate, dateFrom, dateTo], (error3, results3) => {
+            if (error3) {
+              console.error('人件費計算中にエラーが発生しました: ' + error3);
               res.status(500).send('人件費計算中にエラーが発生しました');
             } else {
               console.log('人件費計算が正常に完了しました');
@@ -259,9 +279,10 @@ app.post("/calculate", (req, res) => {
   });
 });
 
+
+
 //今月の食材費と売り上げ高を登録し、FLコストを計算してDBに挿入
 app.post("/postElementFL",(req,res)=>{
-
   // 月ごとの食材費と売上高と、月ごとの人件費（laborSumテーブルから取得）をelementForFLテーブルに挿入
   const postElement=
     `insert into elementForFL(year,month,foodCost,proceeds,labor)
@@ -281,12 +302,12 @@ app.post("/postElementFL",(req,res)=>{
 
  // FL比率を計算してFLテーブルに挿入
     const insertFL=`
-    INSERT INTO FL (year, month, FLcost)
-    SELECT year, month, ((SUM(labor) + foodCost) / proceeds) * 100
-    FROM elementForFL
+    INSERT INTO FL (year, month, flRatio)
+    SELECT year, month, (sum(labor+foodcost)/proceeds)*100
+    from elementforfl
     GROUP BY year, month, foodCost,proceeds
     ON DUPLICATE KEY UPDATE 
-    FLcost = VALUES(FLcost);
+    flRatio = VALUES(flRatio);
     `;
     
     connection.query(postElement,[foodCost,proceeds],(error,results)=>{
@@ -307,24 +328,25 @@ app.post("/postElementFL",(req,res)=>{
 
         })
       }
-    })
-})
+    });
+});
 
 
-// FLコストを取得して「ＦＬ分析」ページに表示するルート
+// FLコストを取得して「ＦＬ分析」ページに表示するルーティング
 app.get("/analystics",(req,res)=>{
 
   // 今月のFLコスト比率を取得
   const getMonthFL=`
-    select FLcost from FL where year=year(now()) and month=month(now());
+    select flRatio from FL where year=year(now()) and month=month(now());
     `;
 
   // 今月の食材費、売上高、人件費、FLコストを取得（→分析結果に表示させる）
   const getElementFL=`
-  SELECT SUM(foodCost) AS foodCost, SUM(proceeds) AS proceeds, SUM(labor) AS labor, (SUM(foodCost) + SUM(labor)) AS realFL, 0.5 * SUM(proceeds) AS idealFL
+  SELECT foodCost, proceeds, labor, SUM(foodCost + labor) AS realFL, 0.6 * proceeds AS idealFL
   FROM elementForFL
   WHERE year = YEAR(NOW()) AND month = MONTH(NOW())
-  GROUP BY year, month;
+  GROUP BY year, month, foodCost, proceeds, labor;
+
   `;
 
   //今年の、 月ごとのFL比率を全て取得（→FL比率推移グラフに表示）
@@ -345,8 +367,8 @@ app.get("/analystics",(req,res)=>{
           console.log('FL要素の取得中が正常に完了しました');
 
       connection.query(getAllFL,(error2,results2)=>{
-        if (error1) {
-          console.error('全てのFLデータの取得中にエラーが発生しました: ' + error1);
+        if (error2) {
+          console.error('全てのFLデータの取得中にエラーが発生しました: ' + error2);
           res.status(500).send('全てのFLデータの取得中にエラーが発生しました');
         } else {
           console.log('全てのFLデータの取得が正常に完了しました');
@@ -359,7 +381,4 @@ app.get("/analystics",(req,res)=>{
 });
 
 
-app.listen(3000);
-
   
-

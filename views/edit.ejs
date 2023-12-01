@@ -11,10 +11,9 @@
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-8">
-                <form action="/update/<%=employee.id%>" method="post" class="d-flex">
+                <form action="/update/<%=employee[0].id%>" method="post" class="d-flex">
                     <div class="mb-3 me-2 flex-grow-1">
-                        <label for="employeeName" class="form-label"></label>
-                        <input type="text" class="form-control" name="employeeName" value="<%=employee.name%>">
+                        <input type="text" class="form-control" name="employeeName" value="<%=employee[0].name%>">
                     </div>
                     <div>
                         <br>

@@ -20,28 +20,50 @@
     <div class="center-content">
       <h2 class="titleMonth">今月のFLコスト</h2>
       <div class="analText">
-        <p>今月のFL比率は<span> <%= monthFL[0].FLcost %></span>％です</p>
+        <p>今月のFL比率は<span> <%= monthFL[0].flRatio %></span>％です</p>
         <p>FLコストは<span> <%= elementFL[0].realFL %></span>円であり、食材費(F)=<span><%=elementFL[0].foodCost%></span>円、人件費(L)=<span><%=elementFL[0].labor%></span>円の内訳となっています</p>
-        <p id="ifMessage"></p>
+        <!-- 結果によって変わるメッセージがここに表示 -->
+        <p id="messageDependRatio"></p>
       </div>
+      <!-- 今月のFL比率を円グラフで表示 -->
       <canvas id="FL"></canvas>
+
     </div>
   </div>
-  <h2 class="yearRatio">今年のFL比率推移グラフ</h2>
-  <div  style="height: 60%; width: 80%; margin-bottom: 2px; position: relative; left: 120px; top: 50px;"> 
-    <canvas id="allFl"></canvas>
+
+  <div class="show-link">
+  <h2 class="text-info">☆記事を参考に、さらに費用を抑える工夫を考えてみましょう</h2>
+  <br>
+    <p>○人件費削減</p>
+      <ul>
+        <li><a href="https://infofood.site/know-how/112#FL", target="_blank">飲食店の人件費を削減するには？考え方や具体策、注意点を徹底解説</a></li>
+        <li><a href="https://www.inshokuten.com/foodist/article/5152/", target="_blank">飲食店の人件費をうまくコントロール、削減する方法は？ 経営者が着目すべき３つの数字</a></li>
+      </ul>
+      <br>
+      <p>○食材費削減</p>
+      <ul>
+        <li><a href="https://fc-real-consulting.tokyo/about-foodcost/", target="_blank">飲食店の食材原価を下げるには？〜下がらない本当の理由〜</a></li>
+        <li><a href="https://www.inshokuten.com/foodist/article/6450/", target="_blank">深刻化する食材仕入れ価格の高騰。飲食店の原価率を上げないための対策は？</a></li>
+      </ul>
   </div>
 
+  <h2 class="yearRatio">今年のFL比率推移グラフ</h2>
+  <div  style="height: 60%; width: 80%; margin-bottom: 2px; position: relative; left: 120px; top: 50px;"> 
+    <!-- FL比率の推移を折れ線グラフで表示-->
+    <canvas id="allFl"></canvas>
+  </div>
 
 
   <script>
     window.onload = () => {
 
       //今月のFLコスト比率を円グラフで表示
-      // サーバーサイドから渡されたデータを取得(赤線が出ているが、処理に問題はないとみている。)
-      const monthFL = <%- JSON.stringify(monthFL) %>;
+      // サーバーサイドから渡されたデータをJSON形式で取得(赤線が出ているが、処理に問題はないとみている。)
+      // エスケープは無効化してある（有効にすると、値を受け取れない）
+      const monthFL = <%-JSON.stringify(monthFL) %>;
 
-      if (monthFL.length > 0) {
+      if (monthFL) {
+        // id要素から2Dコンテキストを取得
         let chart = document.querySelector("#FL").getContext("2d");
 
         new Chart(chart, {
@@ -50,9 +72,10 @@
             labels: ["FL", " "],
             datasets: [{
               backgroundColor:["#1e90ff","#a9a9a9"],
-              data: [monthFL[0].FLcost, 100 - monthFL[0].FLcost]
+              data: [monthFL[0].flRatio, 100 - monthFL[0].flRatio]
             }]
           },
+          // グラフのサイズは固定
           options: {
             responsive: false,
           }
@@ -62,24 +85,32 @@
       }
       
       //FL比率推移を折れ線グラフで表示
+       // サーバーサイドから渡されたデータをJSON形式で取得(赤線が出ているが、処理に問題はないとみている。)
+      // エスケープは無効化してある（有効にすると、値を受け取れない）
       const readAllFl=<%-JSON.stringify(allFL)%>;
 
+      // id要素から2Dコンテキストを取得
       let allChart= document.querySelector("#allFl").getContext("2d");
 
       new Chart(allChart,{
         type:"line",
         data:{
+          // x軸のラベルに月を設定
+          // 取得した月の数字に「～月」を追加した新たな配列
           labels:readAllFl.map(dataPoint => dataPoint.month + "月"),
           datasets:[
             {
               label:"FL比率",
-              data: readAllFl.map(dataPoint => dataPoint.FLcost),
+              //readAllFLからflRatioのみを取り出した新たな配列
+              // グラフに描画するには、こうしないと出来ない＋動的に配列は追加もされる
+              data: readAllFl.map(dataPoint => dataPoint.flRatio),
               borderColor:"#4169e1",
               backgroundColor:"#4169e1",
               lineTension:0,
               borderWidth:2,
             }
           ]},
+          // 折れ線グラフ背景に方眼をつける
           options: {
               scales: {
                   y: {
@@ -98,18 +129,16 @@
                 }
       }});
 
-      const drawBackGround=(target)=>{
-        allChart.fillstyle="black"
-      }
+
       
       // 分析メッセージを表示　
-      let insert=document.getElementById("ifMessage");
-      let differenceFL=Math.round(<%= elementFL[0].realFL %>-<%= elementFL[0].idealFL %>);
+      let messageDependRatio=document.getElementById("messageDependRatio");
+      let differenceFL=Math.round(<%- elementFL[0].realFL %>-<%- elementFL[0].idealFL %>);
 
-      //FL率50％以上の時に表示するメッセージ
-      if(<%= monthFL[0].FLcost %> > 50){
-        insert.textContent=
-        `今月の売り上げは<%= elementFL[0].proceeds %>円でしたので、理想のFL比率【50%以下】を達成するためには、
+      //FL率６0％以上の時に表示するメッセージ
+      if(<%-monthFL[0].flRatio %> > 60){
+        messageDependRatio.textContent=
+        `今月の売り上げは<%= elementFL[0].proceeds %>円でしたので、理想のFL比率【60%以下】を達成するためには、
          FLコストを<%= elementFL[0].idealFL %>円に抑えることが理想でしたが、${differenceFL}円の超過がみられます
 
         ▶改善策として、次のような提案を挙げます
@@ -120,24 +149,24 @@
         　　　 ➡時給設定額の見直しをしてみましょう
 
         来月の営業活動を効率的に行うために、《来月のFL計画》を実施しましょう
-        FL比率【50%】を下回れるように計画を立てて来月も頑張りましょう
-        `;
+        FL比率【60%】を下回れるように計画を立てて来月も頑張りましょう
+        `
+        
+        ;
         
       //FL率50以下の時に表示するメッセージ
       } else {
-        insert.textContent=
-        `理想のFL比率【50%以下】を達成できているようです
+        messageDependRatio.textContent=
+        `理想のFL比率【60%以下】を達成できているようです
         
         来月の営業活動をさらに効率的に行うために、《来月のFL計画》を実施しましょう
         
-        FL比率<%= monthFL[0].FLcost %>をさらに下回れるように計画を立てて来月も頑張りましょう
-        
-        
+        FL比率<%= monthFL[0].flRatio %>をさらに下回れるように計画を立てて来月も頑張りましょう
         `;
       }
-
     }
   </script>
+  
 <div>
   
   <h2 class="nextMonth">来月のFL計画</h2>
@@ -164,11 +193,6 @@
 <br>
 <p id="nextFL"></p>
 
-
-
-
-
-
 <script>
   // ページ読み込み時にローカルストレージからフォームの値を取得
   document.addEventListener("DOMContentLoaded", () => {
@@ -187,10 +211,11 @@
   });
   
   const calc = () => {
+    console.log("calc function called");
       const goalProceeds = parseFloat(document.querySelector('[name="goalProceeds"]').value);
       const goalFlRatio = parseFloat(document.querySelector('[name="goalFlRatio"]').value);
       
-      if (!isNaN(goalProceeds) && !isNaN(goalFlRatio)) {
+      if (goalProceeds && goalFlRatio) {
           const calcNextFL = Math.round(goalProceeds * goalFlRatio / 100);
           const goalFlRatioInput = goalFlRatio + "%";
           const breakDownFood = Math.round(calcNextFL * 0.6);
@@ -215,8 +240,10 @@
       } else {
           document.getElementById("nextFL").innerText = "正しい数値を入力してください。";
       }
-  }
+  };
 </script>
+
+
 </div>
 <a href="/management" class="homeButton">前の画面に戻る</a>
 </body>
@@ -240,6 +267,7 @@
     justify-content: center;
     align-items: center;
     height: 50vh;
+    margin-bottom: 0px;
   }
   
 
@@ -255,6 +283,7 @@
     position: relative; 
     bottom:500px; 
     left: 150px;
+    margin-bottom: 0px;
   }
 
   .titleMonth {
@@ -328,6 +357,7 @@ form {
 
 #nextFL{
   text-align: center;
+  
 
 
 }
@@ -382,6 +412,11 @@ span{
   color:#3e41ec;
 }
 
+
+.show-link{
+  margin-left: 190px;
+ 
+}
 </style>
 
 </html>

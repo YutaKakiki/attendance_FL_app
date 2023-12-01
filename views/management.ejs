@@ -18,13 +18,13 @@
           <th>勤務時間</th>
           <th>給与</th>
         </tr>
-        <!-- EJSでjavasriptを埋め込み、従業員ごとに労働時間と給与額を表示 -->
-        <% salaryData.forEach((row) => { %>
+        <!-- EJSでjavasriptを埋め込み、イテレートし、従業員ごとに労働時間と給与額を表示 -->
+        <% salaryDatas.forEach((data) => { %>
           <tr>
-            <td><%= row.id %></td>
-            <td><%= row.name %></td>
-            <td><%= row.workTime %></td>
-            <td><%= row.salary %>円</td>
+            <td><%= data.id %></td>
+            <td><%= data.name %></td>
+            <td><%= data.workTime %></td>
+            <td><%= data.salary %>円</td>
           </tr>
         <% }); %>
       </table>
@@ -34,11 +34,11 @@
         <form action="/calculate" method="post">
           <br>
             <label for="hourly_rate"></label>
-            <input type="number" id="hourly_rate" name="hourly_rate" placeholder="時給を設定" value="" required>
+            <input type="number" id="hourly_rate" name="hourly_rate" placeholder="時給を設定"  required>
         
-          <input type="date" id="dateFrom" name="dateFrom" required="">
+          <input type="date" id="dateFrom" name="dateFrom" required>
           <span>~</span>
-          <input type="date" id="dateTo" name="dateTo" required="">
+          <input type="date" id="dateTo" name="dateTo" required>
         
           <input type="submit" value="自動計算">
         </form>
@@ -56,7 +56,7 @@
         }
       });
       // フォームが送信されたときにローカルストレージに時給を保存
-      document.querySelector('form').addEventListener('submit', function() {
+      document.addEventListener('submit', function() {
 
         const hourlyRateInput = document.getElementById('hourly_rate');
         const hourlyRate = hourlyRateInput.value;
@@ -80,7 +80,7 @@
       });
 
       // フォームが送信されたときにローカルストレージに時給を保存
-      document.querySelector('form').addEventListener('submit', function() {
+      document.addEventListener('submit', function() {
 
         const dateFromInput = document.getElementById('dateFrom');
         const dateFrom = dateFromInput.value;
@@ -101,7 +101,7 @@
       });
 
       // フォームが送信されたときにローカルストレージに時給を保存
-      document.querySelector('form').addEventListener('submit', function() {
+      document.addEventListener('submit', function() {
 
         const dateToInput = document.getElementById('dateTo');
         const dateTo = dateToInput.value;
@@ -121,7 +121,7 @@
             <th>人件費</th>
         </tr>
         <!-- EJSでjavascriptを埋め込み、月ごとの人件費を取得して表示 -->
-        <% monthlyData.forEach(function(data) { %>
+        <% monthlyDatas.forEach((data)=> { %>
             <tr>
                 <td><%= data.year %></td>
                 <td><%= data.month %></td>
@@ -141,7 +141,7 @@
             <th>人件費</th>
           </tr>
         <!-- EJSでjavascriptを埋め込み、年ごとの人件費を取得して表示 -->
-        <% yearlyData.forEach(function(data) { %>
+        <% yearlyDatas.forEach((data)=>{ %>
           <tr>
                 <td><%= data.year %></td>
                 <td><%= data.yearlyLabor %> 円</td>
@@ -163,6 +163,11 @@
               <input type="number" name="proceeds" placeholder="今月の売上高を入力" id="proceeds">
               <br>
               <input type="submit" value="登録">
+              <br>
+              <!-- 登録完了メッセージを表示するスペース -->
+              <div id="message" class="text-center h1 mt-4" style="display: none;"></div>
+              <span class="arrow-down">&#8595;</span>
+              <br>
 
               <script>
                 // ページが読み込まれたとき、ローカルストレージから値を取得
@@ -182,7 +187,7 @@
                     }
                   });
 
-                  // フォームが送信されたとき、入力値をローカルストレージに保存します
+                  // フォームが送信されたとき、入力値をローカルストレージに保存
                   document.getElementById('element').addEventListener('submit', function(event) {
                     event.preventDefault();
 
@@ -207,12 +212,6 @@
                   });
             </script>
 
-              <br>
-              <!-- 登録完了メッセージを表示するスペース -->
-              <div id="message" class="text-center h1 mt-4" style="display: none;"></div>
-              <span class="arrow-down">&#8595;</span>
-              <br>
-
               <!-- FLコスト分析ページへ飛ぶボタン -->
               <a href="/analystics" class="FLbutton">FLコスト分析</a>
             </form>
@@ -226,10 +225,10 @@
             <br>
             <p>FLコストとは、F=Food（食材費）と L=Labor（人件費）を足した費用のことです</p>
             <p>この分析では、「FL比率」（売上高に占めるFLコストの比率）を計算し、今後の事業計画に対する提案を行います</p>
-            <p><span>FL比率は、お店が儲かっているかを判断する指標の一つ</span>であり、<span>50%程度が一般的な目安</span>となるため、50%以上であれば利益率が低いということになります</p>
+            <p><span>FL比率は、お店が儲かっているかを判断する指標の一つ</span>であり、<span>60%程度が一般的な目安</span>となるため、60%以上であれば利益率が低いということになります</p>
             <p>このFL比率を数値として可視化することで、経営方針を適格に定めることができます</p>
-            <p>この分析では、毎月のFL比率を50%以下に留めることを目標としていますが、自身で来月のFL比率の目標値を設定することもできます</p>
-            <p>今月の食材費と売上高を入力し、今月のFL比率が50%以下かどうかを確認し、今後の利益率の増加に繋げましょう</p>
+            <p>この分析では、毎月のFL比率を60%以下に留めることを目標としていますが、自身で来月のFL比率の目標値を設定することもできます</p>
+            <p>今月の食材費と売上高を入力し、今月のFL比率が60%以下かどうかを確認し、今後の利益率の増加に繋げましょう</p>
   
     <a href="/" class="button">ホーム画面に戻る</a>
     
