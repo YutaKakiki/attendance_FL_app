@@ -133,6 +133,7 @@
       
       // 分析メッセージを表示　
       let messageDependRatio=document.getElementById("messageDependRatio");
+      // 実際のFLコストと理想のFLコスト都の差分
       let differenceFL=Math.round(<%- elementFL[0].realFL %>-<%- elementFL[0].idealFL %>);
 
       //FL率６0％以上の時に表示するメッセージ
@@ -169,6 +170,7 @@
   
 <div>
   
+  <!-- 来月のFL資産 -->
   <h2 class="nextMonth">来月のFL計画</h2>
   <br>
   <div class="message">
@@ -179,14 +181,17 @@
   <form>
     <div class="form-section">
         <p>来月の売り上げ目標</p>
+        <!-- 目標の売り上げ高を記入 -->
         <input type="number" name="goalProceeds" style="width: 400px;">
         <br>
         <br>
         <p>来月のFL比率目標</p>
+        <!-- 目標のFL比率を記入 -->
         <p><input type="number" name="goalFlRatio" class="nextFlForm" style="width: 50px;">%</p>
     </div>
     
     <div class="button-container">
+      <!-- ボタンが押された時にcalc関数を呼び出す -->
         <input type="button" onclick="calc()" class="calcBtn" value="FLを試算" id="calcBtn">
     </div>
 </form>
@@ -196,12 +201,14 @@
 <script>
   // ページ読み込み時にローカルストレージからフォームの値を取得
   document.addEventListener("DOMContentLoaded", () => {
+    // それぞれのフォームのname要素を取得
       const goalProceedsInput = document.querySelector('[name="goalProceeds"]');
       const goalFlRatioInput = document.querySelector('[name="goalFlRatio"]');
-      
+      // ローカルストレージにあるデータを取得
       const storedGoalProceeds = localStorage.getItem("goalProceeds");
       const storedGoalFlRatio = localStorage.getItem("goalFlRatio");
       
+      // ローカルストレージに値があれば、フォーム内に表示
       if (storedGoalProceeds) {
           goalProceedsInput.value = storedGoalProceeds;
       }
@@ -210,16 +217,21 @@
       }
   });
   
+  // 次月のFLを試算する
   const calc = () => {
-    console.log("calc function called");
+    // フォーム要素から値を取得し、（フォームで取得した値は文字列のため）数値型に。
       const goalProceeds = parseFloat(document.querySelector('[name="goalProceeds"]').value);
       const goalFlRatio = parseFloat(document.querySelector('[name="goalFlRatio"]').value);
       
+      // 双方の値が存在すれば、試算を行う
       if (goalProceeds && goalFlRatio) {
           const calcNextFL = Math.round(goalProceeds * goalFlRatio / 100);
           const goalFlRatioInput = goalFlRatio + "%";
+          // 試算した次月のFL比率から、目安の食材費・人件費を算出（３：２）
           const breakDownFood = Math.round(calcNextFL * 0.6);
           const breakDownLabor = Math.round(calcNextFL * 0.4);
+
+          // 今月実際にかかった食材費・人件費と目安の額の差分を算出
           const differenceFood=Math.round(breakDownFood-<%=elementFL[0].foodCost%>);
           const differenceLabor=Math.round(breakDownLabor-<%=elementFL[0].labor%>);
   
@@ -227,6 +239,7 @@
           localStorage.setItem("goalProceeds", goalProceeds);
           localStorage.setItem("goalFlRatio", goalFlRatio);
   
+          // 指定のid要素に文章を表示
           document.getElementById("nextFL").innerText = 
           `来月はFLコストを${calcNextFL}円に抑えることを目指しましょう
 
@@ -374,7 +387,7 @@ form {
     border-radius: 5px;
 }
 
-#ifMessage {
+#messageDependRatio {
   white-space: pre-line;
 }
 
