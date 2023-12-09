@@ -20,7 +20,7 @@
     <div class="center-content">
       <h2 class="titleMonth">今月のFLコスト</h2>
       <div class="analText">
-        <p>今月のFL比率は<span> <%= monthFL[0].flRatio %></span>％です</p>
+        <p>今月のFLコスト比率は<span> <%= monthFL[0].flRatio %></span>％です</p>
         <p>FLコストは<span> <%= elementFL[0].realFL %></span>円であり、食材費(F)=<span><%=elementFL[0].foodCost%></span>円、人件費(L)=<span><%=elementFL[0].labor%></span>円の内訳となっています</p>
         <!-- 結果によって変わるメッセージがここに表示 -->
         <p id="messageDependRatio"></p>
@@ -102,7 +102,7 @@
             {
               label:"FL比率",
               //readAllFLからflRatioのみを取り出した新たな配列
-              // グラフに描画するには、こうしないと出来ない＋動的に配列は追加もされる
+              // グラフに描画するには、こうしないと出来ない＋動的に配列の中身は追加されていく
               data: readAllFl.map(dataPoint => dataPoint.flRatio),
               borderColor:"#4169e1",
               backgroundColor:"#4169e1",
@@ -131,7 +131,7 @@
 
 
       
-      // 分析メッセージを表示　
+      // 分析メッセージを表示する要素を取得
       let messageDependRatio=document.getElementById("messageDependRatio");
       // 実際のFLコストと理想のFLコスト都の差分
       let differenceFL=Math.round(<%- elementFL[0].realFL %>-<%- elementFL[0].idealFL %>);
@@ -139,7 +139,7 @@
       //FL率６0％以上の時に表示するメッセージ
       if(<%-monthFL[0].flRatio %> > 60){
         messageDependRatio.textContent=
-        `今月の売り上げは<%= elementFL[0].proceeds %>円でしたので、理想のFL比率【60%以下】を達成するためには、
+        `今月の売り上げは<%= elementFL[0].proceeds %>円でしたので、理想のFLコスト比率【60%以下】を達成するためには、
          FLコストを<%= elementFL[0].idealFL %>円に抑えることが理想でしたが、${differenceFL}円の超過がみられます
 
         ▶改善策として、次のような提案を挙げます
@@ -150,7 +150,8 @@
         　　　 ➡時給設定額の見直しをしてみましょう
 
         来月の営業活動を効率的に行うために、《来月のFL計画》を実施しましょう
-        FL比率【60%】を下回れるように計画を立てて来月も頑張りましょう
+
+        FLコスト比率【60%】を下回れるように計画を立てて来月も頑張りましょう
         `
         
         ;
@@ -158,11 +159,10 @@
       //FL率50以下の時に表示するメッセージ
       } else {
         messageDependRatio.textContent=
-        `理想のFL比率【60%以下】を達成できているようです
+        `理想のFLコスト比率【60%以下】を達成できているようです
         
         来月の営業活動をさらに効率的に行うために、《来月のFL計画》を実施しましょう
-        
-        FL比率<%= monthFL[0].flRatio %>をさらに下回れるように計画を立てて来月も頑張りましょう
+        FLコスト比率<%= monthFL[0].flRatio %>をさらに下回れるように計画を立てて来月も頑張りましょう
         `;
       }
     }
@@ -185,7 +185,7 @@
         <input type="number" name="goalProceeds" style="width: 400px;">
         <br>
         <br>
-        <p>来月のFL比率目標</p>
+        <p>来月のFLコスト比率目標</p>
         <!-- 目標のFL比率を記入 -->
         <p><input type="number" name="goalFlRatio" class="nextFlForm" style="width: 50px;">%</p>
     </div>
@@ -243,7 +243,7 @@
           document.getElementById("nextFL").innerText = 
           `来月はFLコストを${calcNextFL}円に抑えることを目指しましょう
 
-           FL比率${goalFlRatioInput}のうち、FLコストの内訳の目安は、
+           FLコスト比率${goalFlRatioInput}のうち、FLコストの内訳の目安は、
            食材費（F）=${breakDownFood}円、人件費（L）=${breakDownLabor}円です
 
            今月の食材費（F）は<%=elementFL[0].foodCost%>円でしたので、その差は${differenceFood}円です。

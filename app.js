@@ -172,6 +172,7 @@ app.post('/check_out/:id', (req, res) => {
 // 管理者画面へのルート
 app.get("/management", (req, res) => {
   // 従業員ごとの労働時間と給与情報をcalculationテーブルから取得（→ページに表示）
+  // 従業員名・idと給与情報を併せて表示するためにテーブルを結合して取得している
   const salaryQuery = `
     SELECT calculation.id, employees.name, employees.id, calculation.workTime, calculation.salary
     FROM calculation
@@ -229,6 +230,7 @@ app.post("/calculate", (req, res) => {
       console.log('指定範囲外のデータ削除が正常に完了しました');
 
  // recordsテーブルから従業員ごとの労働時間を計算しcalculationテーブルに挿入
+//  値が入って入れば、その値を更新する
       const upsertRecordsQuery = `
         INSERT INTO calculation (id, workTime, salary)
         SELECT id,
@@ -243,7 +245,9 @@ app.post("/calculate", (req, res) => {
         salary = VALUES(salary);
       `;
 
-// 日ごとに従業員の給与を合計した人件費をlaborSumテーブルに挿入（このテーブルから取得して月ごと/年ごとの人件費を計算）
+// 日ごとに従業員の給与ををlaborSumテーブルに挿入
+// （calculationテーブルにpostしている内容はそう変わりないが、こちらはテーブル内容がずっと残り続けるのに対し、calcuテーブルは常に内容が刷新される）
+// このテーブルから取得して月ごと/年ごとの人件費を計算する
       const calculateSum = `
         INSERT INTO laborSum (id, month, labor, year, day)
         SELECT id,
@@ -381,4 +385,5 @@ app.get("/analystics",(req,res)=>{
 });
 
 
-  
+
+
